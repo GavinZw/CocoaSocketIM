@@ -34,8 +34,8 @@ typedef NS_ENUM(NSUInteger, CAConnectionStatus) {
 
 - (instancetype)initWithHost:(NSString *)aHost port:(NSUInteger)aPort secure:(BOOL)secure delegate:(id<CAConnectDelegate>)delegate;
 
-- (void)open;
-- (void)close;
+- (void)connect;
+- (void)disconnect;
 
 - (void)sendMessage:(NSDictionary *)message timeOut:(NSUInteger)timeOut tag:(long)tag;
 
@@ -45,6 +45,11 @@ typedef NS_ENUM(NSUInteger, CAConnectionStatus) {
 
 
 @interface CAConnection (Operation)
+
+/**
+ notice: YES. 网络中断.内部断开连接, 如果网络监测有网,但是socket处于未连接状态 , 进行重连.
+ */
+- (void)networkChangedNotice:(BOOL)notice;
 
 /**
  读取服务端数据

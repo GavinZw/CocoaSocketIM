@@ -66,6 +66,7 @@ typedef NS_ENUM(NSUInteger, CASocketUnPacketHeadErrorType) {
 
 @property (nonatomic, strong) NSMutableArray *asyncSockets;
 
+@property (nonatomic) NSInteger autoConnectCount; // default 3.
 @property (nonatomic) CASocketUnPacketHeadErrorType   unPacketHeadErrorType;
 
 @end
@@ -104,6 +105,7 @@ typedef NS_ENUM(NSUInteger, CASocketUnPacketHeadErrorType) {
        _port = aPort;
        _status = CAConnectionStatus_Init;
        _version = @"s.t.0.1";
+       _autoConnectCount = 3;
        
        _asyncSocket = [[GCDAsyncSocket alloc] initWithDelegate:self  delegateQueue:dispatch_get_main_queue()];
        [_asyncSocket setAutoDisconnectOnClosedReadStream:NO];
@@ -164,22 +166,27 @@ typedef NS_ENUM(NSUInteger, CASocketUnPacketHeadErrorType) {
 
 #pragma mark - public funcs
 
-- (void)open{
+- (void)connect{
   NSParameterAssert(_host);
   NSParameterAssert(_port);
   
   LOCK([self _connectWithHost:_host port:_port];)
 }
 
-- (void)close{
+- (void)disconnect{
   LOCK(
        _asyncSocket.userData = @(CASocketOfflineType_User);
-       [_asyncSocket disconnect];
        )
 }
 
 - (BOOL)isConnected{
   LOCK(BOOL c = [_asyncSocket isConnected];); return c;
+}
+
+- (void)_disconnect{
+  //断开连接
+  [_asyncSocket disconnect];
+  _autoConnectCount = 0;
 }
 
 - (void)sendMessage:(NSDictionary *)message timeOut:(NSUInteger)timeOut tag:(long)tag{
@@ -245,9 +252,17 @@ typedef NS_ENUM(NSUInteger, CASocketUnPacketHeadErrorType) {
 - (void)socketDidDisconnect:(GCDAsyncSocket *)sock withError:(nullable NSError *)err{
   //如果是用户主动断开连接
   CASocketOfflineType offline = [_asyncSocket.userData integerValue];
-  if (offline == CASocketOfflineType_User) return;
+  if (offline == CASocketOfflineType_User){
+    CALog(@"用户主动断开连接");
+  }
   
-  CALog(@"[CAConnection] socketDidDisconnect...%@", err.description);
+  else if(offline == CASocketOfflineType_Server){ // 服务器掉线,自动重连
+      CALog(@"[CAConnection] socketDidDisconnect...%@", err.description);
+  };
+  
+
+  
+
   
   if (_delegate && [_delegate respondsToSelector:@selector(cocoaIMConnect:didError:)]) {
     [_delegate cocoaIMConnect:self didError:err];
