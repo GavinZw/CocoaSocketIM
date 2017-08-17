@@ -1,0 +1,25 @@
+#source 'https://github.com/CocoaPods/Specs'
+
+# Uncomment this line to define a global platform for your project
+platform :ios, '8.0'
+inhibit_all_warnings!
+#use_frameworks!
+
+workspace 'SocketAll'
+
+project './CocoaSocketIM/CocoaSocketIM.xcodeprog'
+target :CocoaSocketIM do
+  pod 'ReactiveObjC', '~> 2.1.0'
+  pod 'CocoaAsyncSocket', '~> 7.6.1'
+  
+end
+
+target :SocketExample do
+  pod 'ReactiveObjC', '~> 2.1.0'
+  pod 'CocoaAsyncSocket', '~> 7.6.1'
+
+end
+
+
+
+

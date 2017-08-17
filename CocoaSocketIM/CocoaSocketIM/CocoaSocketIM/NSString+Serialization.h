@@ -1,0 +1,15 @@
+//
+//  NSString+Serialization.h
+//  CocoaSocketIM
+//
+//  Created by Gavin on 2017/8/16.
+//  Copyright © 2017年 Gavin. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+@interface NSString (Serialization)
+
++ (NSDictionary *)dictionaryFromJson:(NSString *)json;
+
+@end
